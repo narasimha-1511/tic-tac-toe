@@ -1,30 +1,28 @@
 import React from 'react';
 import Square from './Square';
+import '../styles/Board.css';
 
-function Board({ squares, onClick }) {
+function Board({ squares, onClick, winningSquares }) {
   const renderSquare = (i) => {
-    return <Square value={squares[i]} onClick={() => onClick(i)} />;
+    return (
+      <Square
+        key={i}
+        value={squares[i]}
+        onClick={() => onClick(i)}
+        isWinning={winningSquares.includes(i)}
+      />
+    );
   };
 
   return (
-    <div>
-      <div className="board-row">
-        {renderSquare(0)}
-        {renderSquare(1)}
-        {renderSquare(2)}
-      </div>
-      <div className="board-row">
-        {renderSquare(3)}
-        {renderSquare(4)}
-        {renderSquare(5)}
-      </div>
-      <div className="board-row">
-        {renderSquare(6)}
-        {renderSquare(7)}
-        {renderSquare(8)}
-      </div>
+    <div className="board">
+      {[0, 1, 2].map((row) => (
+        <div key={row} className="board-row">
+          {[0, 1, 2].map((col) => renderSquare(row * 3 + col))}
+        </div>
+      ))}
     </div>
   );
 }
 
-export default Board;
+export default React.memo(Board);

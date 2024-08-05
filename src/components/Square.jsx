@@ -1,11 +1,15 @@
 import React from 'react';
+import '../styles/Square.css';
 
-function Square({ value, onClick }) {
+function Square({ value, onClick, isWinning }) {
   return (
-    <button className="square" onClick={onClick}>
+    <button 
+      className={`square ${isWinning ? 'winning' : ''}`} 
+      onClick={onClick}
+    >
       {value}
     </button>
   );
 }
 
-export default Square;
+export default React.memo(Square);
