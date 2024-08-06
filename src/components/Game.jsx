@@ -1,52 +1,89 @@
-// Delete the existing imports and add:
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Board from './Board';
+import ScoreBoard from './ScoreBoard';
+import Settings from './Settings';
 import { calculateWinner } from '../utils/gameLogic';
+import { PLAYER_X, PLAYER_O, DRAW } from '../utils/constants';
 import '../styles/Game.css';
 
-// In the Game component, add a new state and update handleClick:
-const [winningSquares, setWinningSquares] = useState([]);
+function Game() {
+  const [history, setHistory] = useState([{ squares: Array(9).fill(null) }]);
+  const [stepNumber, setStepNumber] = useState(0);
+  const [xIsNext, setXIsNext] = useState(true);
+  const [winningSquares, setWinningSquares] = useState([]);
+  const [isAscending, setIsAscending] = useState(true);
+  const [scores, setScores] = useState({ [PLAYER_X]: 0, [PLAYER_O]: 0 });
+  const [boardSize, setBoardSize] = useState(3);
+  const [winningLength, setWinningLength] = useState(3);
 
-const handleClick = useCallback((i) => {
-  const newHistory = history.slice(0, stepNumber + 1);
-  const current = newHistory[newHistory.length - 1];
-  const squares = current.squares.slice();
-  if (calculateWinner(squares).winner || squares[i]) {
-    return;
-  }
-  squares[i] = xIsNext ? 'X' : 'O';
-  setHistory(newHistory.concat([{ squares: squares }]));
-  setStepNumber(newHistory.length);
-  setXIsNext(!xIsNext);
-  
-  const result = calculateWinner(squares);
-  if (result.winner) {
-    setWinningSquares(result.line);
-  }
-}, [history, stepNumber, xIsNext]);
+  useEffect(() => {
+    const savedState = localStorage.getItem('ticTacToeState');
+    if (savedState) {
+      const { history, stepNumber, xIsNext, scores, boardSize, winningLength } = JSON.parse(savedState);
+      setHistory(history);
+      setStepNumber(stepNumber);
+      setXIsNext(xIsNext);
+      setScores(scores);
+      setBoardSize(boardSize);
+      setWinningLength(winningLength);
+    }
+  }, []);
 
-// Add a new resetGame function:
-const resetGame = () => {
-  setHistory([{ squares: Array(9).fill(null) }]);
-  setStepNumber(0);
-  setXIsNext(true);
-  setWinningSquares([]);
-};
+  useEffect(() => {
+    localStorage.setItem('ticTacToeState', JSON.stringify({
+      history,
+      stepNumber,
+      xIsNext,
+      scores,
+      boardSize,
+      winningLength
+    }));
+  }, [history, stepNumber, xIsNext, scores, boardSize, winningLength]);
 
-// Update the return statement:
-return (
-  <div className="game">
-    <div className="game-board">
-      <Board 
-        squares={current.squares} 
-        onClick={handleClick}
-        winningSquares={winningSquares}
-      />
+  // ... (keep existing handleClick, jumpTo, resetGame functions)
+
+  const updateScores = (winner) => {
+    if (winner && winner !== DRAW) {
+      setScores(prevScores => ({
+        ...prevScores,
+        [winner]: prevScores[winner] + 1
+      }));
+    }
+  };
+
+  // Update handleClick to use updateScores
+  const handleClick = useCallback((i) => {
+    // ... (existing code)
+    const result = calculateWinner(squares, boardSize, winningLength);
+    if (result.winner) {
+      setWinningSquares(result.line);
+      updateScores(result.winner);
+    }
+  }, [history, stepNumber, xIsNext, boardSize, winningLength]);
+
+  // ... (keep existing JSX, but add ScoreBoard and Settings components)
+  return (
+    <div className="game">
+      <div className="game-board">
+        <Board 
+          squares={current.squares} 
+          onClick={handleClick}
+          winningSquares={winningSquares}
+          boardSize={boardSize}
+        />
+      </div>
+      <div className="game-info">
+        <ScoreBoard scores={scores} />
+        <Settings 
+          boardSize={boardSize} 
+          setBoardSize={setBoardSize}
+          winningLength={winningLength}
+          setWinningLength={setWinningLength}
+        />
+        {/* ... (existing status, move sorting, and reset button) */}
+      </div>
     </div>
-    <div className="game-info">
-      <div className="status">{status}</div>
-      <ol>{moves}</ol>
-      <button className="reset-button" onClick={resetGame}>Reset Game</button>
-    </div>
-  </div>
-);
+  );
+}
+
+export default Game;
