@@ -1,4 +1,6 @@
-// Update the Square component for better accessibility
+import React from 'react';
+import '../styles/square.css';
+
 function Square({ value, onClick, isWinning, 'aria-label': ariaLabel }) {
   return (
     <button 
@@ -10,3 +12,5 @@ function Square({ value, onClick, isWinning, 'aria-label': ariaLabel }) {
     </button>
   );
 }
+
+export default React.memo(Square);

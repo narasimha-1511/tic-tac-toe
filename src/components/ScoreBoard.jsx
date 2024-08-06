@@ -1,6 +1,6 @@
 import React from 'react';
 import { PLAYER_X, PLAYER_O } from '../utils/constants';
-import '../styles/ScoreBoard.css';
+import '../styles/SocreBoard.css';
 
 function ScoreBoard({ scores }) {
   return (

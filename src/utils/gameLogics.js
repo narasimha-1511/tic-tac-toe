@@ -1,22 +1,28 @@
-import { BOARD_SIZE, WINNING_LENGTH, DRAW } from './constants';
+import { DRAW } from './constants';
 
-export function calculateWinner(squares) {
+export  default function calculateWinner(squares, boardSize, winningLength) {
   const lines = [];
-  
+
   // Horizontal and vertical lines
-  for (let i = 0; i < BOARD_SIZE; i++) {
-    lines.push(Array.from({length: BOARD_SIZE}, (_, j) => i * BOARD_SIZE + j)); // horizontal
-    lines.push(Array.from({length: BOARD_SIZE}, (_, j) => j * BOARD_SIZE + i)); // vertical
+  for (let i = 0; i < boardSize; i++) {
+    for (let j = 0; j <= boardSize - winningLength; j++) {
+      lines.push(Array.from({length: winningLength}, (_, k) => i * boardSize + j + k)); // horizontal
+      lines.push(Array.from({length: winningLength}, (_, k) => (j + k) * boardSize + i)); // vertical
+    }
   }
-  
+
   // Diagonal lines
-  lines.push(Array.from({length: BOARD_SIZE}, (_, i) => i * BOARD_SIZE + i)); // top-left to bottom-right
-  lines.push(Array.from({length: BOARD_SIZE}, (_, i) => i * BOARD_SIZE + (BOARD_SIZE - 1 - i))); // top-right to bottom-left
+  for (let i = 0; i <= boardSize - winningLength; i++) {
+    for (let j = 0; j <= boardSize - winningLength; j++) {
+      lines.push(Array.from({length: winningLength}, (_, k) => (i + k) * boardSize + j + k)); // top-left to bottom-right
+      lines.push(Array.from({length: winningLength}, (_, k) => (i + k) * boardSize + (j + winningLength - 1 - k))); // top-right to bottom-left
+    }
+  }
 
   for (let line of lines) {
-    const [a, b, c] = line;
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return { winner: squares[a], line: line };
+    const lineSquares = line.map(i => squares[i]);
+    if (lineSquares.every(square => square && square === lineSquares[0])) {
+      return { winner: lineSquares[0], line };
     }
   }
 
